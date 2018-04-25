@@ -47,14 +47,14 @@ In order to prevent the number of particles growing uncontrollabley and from ins
 This step updates our belief of where all the particles are in the world coordinate frame by regenerating random Gaussian values for x, y, and theta based on the current velocity and yaw rate of the car. Using these estimates as the mean a Gaussian distribution is generated and a sample from each is set as the new particle postion estimate.
 
 <p align="center">
- <img src="./res/prediction_formula.png" width="350">
+ <img src="./res/prediction_formula.png">
 </p>
 
 ### 1.3 Data Association
 In order to use the observed particle measurements from the lidar on the car it is essential to know which measurement value most likely corresponds to which particle in the filter. To determine this the nearest neighbour for each measurement is determined so an observed measurement does not interfere with an unassociated particle.
 
 <p align="center">
- <img src="./res/association.png" width="350">
+ <img src="./res/association.png">
 </p>
 
 ### 1.4 Update Weights
@@ -64,7 +64,7 @@ After predicting the new particle positions and associating the measured data wi
 For each particle find all possible lardmarks in range of the sensor and then transform the landmarks from car coordinates to map coordinates.
 
 <p align="center">
- <img src="./res/transform_matrix.png" width="350">
+ <img src="./res/transform_matrix.png">
 </p>
 
 #### 1.4.2 Associate Data
@@ -74,7 +74,7 @@ With all the observation transformed into the map coordinates we can now associa
 Find the associated particle and recalculate the probability using the equation provided below.
 
 <p align="center">
- <img src="./res/particle_weight.png" width="350">
+ <img src="./res/particle_weight.png">
 </p>
 
 ### 1.5 Resample
