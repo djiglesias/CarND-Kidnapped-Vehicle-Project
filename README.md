@@ -58,35 +58,47 @@ In order to use the observed particle measurements from the lidar on the car it 
 </p>
 
 ### 1.4 Update Weights
-After predicting the new particle positions and associating the measured data with their mostly likely matches, we need to update the particle weights using a multi-variate Gaussian distribution. 
+After updating the list of particles with their estimated position state from the prediction step, we know need to adjust the particle weights so that the more likely positions stand out from the rest. Here the landmarks in range of each particle are associated to the closest observation and then transformed into the map coordinates to test the likeliness of this particle being the true position.
 
 #### 1.4.1 Transform Coordinates
-For each particle find all possible lardmarks in range of the sensor and then transform the landmarks from car coordinates to map coordinates.
+For each particle we have a list of landmarks in range of the sensor but these are in the car coordinate system. In order to make a prediction on the car's position we have to translate these observations into the map coordinate frame to compare the particles' relative position to the known landmarks from the map. The matrix transformation is as follows:
 
 <p align="center">
  <img src="./res/transform_matrix.png">
 </p>
 
+Where *x<sub>_m</sub>* and *y<sub>_m</sub>* are map coordinates, *x<sub>_c</sub>* and *y<sub>_c</sub>* are car coordinates, and *x<sub>_p</sub>* and *y<sub>_p</sub>* are particle coordinates. This can be expressed in code as:
+
+    $  x_t = x_p + cos(theta_p) * x_c - sin(theta_p) * y_c;
+    $  y_t = y_p + sin(theta_p) * x_c + cos(theta_p) * y_c;
+
 #### 1.4.2 Associate Data
-With all the observation transformed into the map coordinates we can now associated the measurements with the most likely particles using the function discussed in Section 1.3.
+With list of transformed observations in terms of map coordinates we can now call upon our data association function (Section 1.3) to set each observation to the id of the most likely (best matched) landmark from the map. 
 
 #### 1.4.3 Determine Measurement Probability
-Find the associated particle and recalculate the probability using the equation provided below.
+For each particle in the list we now compare the observed coordinates in terms of the map coordinates to the actual landmark position and update the weight of this particle being the correct position using the following formula.
 
 <p align="center">
  <img src="./res/particle_weight.png">
 </p>
 
+Which can be expressed in code as:
+
+    $ weight = (1.0/(2.0*M_PI*sig_x*sig_y)) * exp(-(dx_2/(2.0*sig_x_2) + (dy_2/(2.0*sig_y_2))));
+
+Once all the weights have been updated we need to normalize them in the range 0 and 1 so they can be used as probabilities for resampling.
+
+    $ for (int i = 0; i < num_particles; i++)
+    $   particles[i].weight /= max_weight;
+
 ### 1.5 Resample
-Resample particles with replacement using probability proportional to their weight...
+Now that all the particle weights have been updated and normalized we can update the weights to the Bayesian probability function. For each particle we multiply all the calculated measurements together to get the final particle weight.
 
 ## 2.0 Tuning & Optimization
-- number of particles and how it affects time/accuracy
-- optimize by generating gaussian noise outside loop
-- reduce unnecessary calculations
+The project requirement is to maintain x, y, and theta error within an acceptable tolerance and complete the motion path before 100 seconds has elapsed. Ways to speed up the program run time is to reduce repeated calculations in loops by using constants, reducing the number of particles in the filter, and by avoiding heavy computational calculations where necessary (such as when calcuating distance to a landmark, use square value rather than computing square root). 
 
 ## 3.0 Running the Simulator
-[insert gif]
 
-
-
+<p align="center">
+ <img src="./res/runtime.gif">
+</p>
