@@ -100,5 +100,5 @@ The project requirement is to maintain x, y, and theta error within an acceptabl
 ## 3.0 Running the Simulator
 
 <p align="center">
- <img src="./res/runtime.gif">
+ <img src="./res/simulator.gif">
 </p>
